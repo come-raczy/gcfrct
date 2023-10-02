@@ -19,6 +19,7 @@
 #
 
 cmake_minimum_required(VERSION 3.18)
+enable_testing()
 project(gcfrct LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17) # force C++17 on each target
@@ -44,8 +45,9 @@ add_custom_command(
     MAIN_DEPENDENCY ${GRESOURCE_XML}
 )
 
-add_executable(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}.cpp ${GRESOURCE_C})
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE PkgConfig::GTK4 ${GTKMM_LIBRARIES})
-
 add_subdirectory(src)
+
+add_executable(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}.cpp ${GRESOURCE_C}  $<TARGET_OBJECTS:${CMAKE_PROJECT_NAME}_OBJECTS>)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${${CMAKE_PROJECT_NAME}_SRC_INCLUDE_DIRS})
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE PkgConfig::GTK4 ${GTKMM_LIBRARIES})
 

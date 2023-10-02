@@ -12,6 +12,7 @@ following packages are required:
 * CMake >= 3.18
 * g++ >=10.1.0
 * gtkmm >= 4.0
+* gtest >= 1.12
 
 Note: on WSL, the following is needed:
 
@@ -29,6 +30,15 @@ From the source directory:
     cd build
     cmake ..
     make
+
+Optionally, run the tests after building (from the build directory):
+
+    ctest
+
+Note: when a conda environment is activated, CMake will select the version of
+gtest from conda. This will fail because of typeinfo configuration. It is
+essential to deactivate the conda environment before executing CMake so that
+the correct version of gtest is selected.
 
 ## Install
 
