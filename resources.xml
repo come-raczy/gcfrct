@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/gcfrct/application">
     <file preprocess="xml-stripblanks">ui/gcfrct.ui</file>
+    <file preprocess="xml-stripblanks">ui/gears_menu.ui</file>
   </gresource>
 </gresources>

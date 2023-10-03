@@ -51,6 +51,17 @@ GcfrctAppWindow* GcfrctApplication::create_appwindow()
   return appwindow;
 }
 
+void GcfrctApplication::on_startup()
+{
+  // Call the base class's implementation.
+  Gtk::Application::on_startup();
+
+  // Add actions and keyboard accelerators for the menu.
+  add_action("preferences", sigc::mem_fun(*this, &GcfrctApplication::on_action_preferences));
+  add_action("quit", sigc::mem_fun(*this, &GcfrctApplication::on_action_quit));
+  set_accel_for_action("app.quit", "<Ctrl>Q");
+}
+
 void GcfrctApplication::on_activate()
 {
   try
@@ -100,4 +111,34 @@ void GcfrctApplication::on_open(const Gio::Application::type_vec_files& files,
   {
     std::cerr << "GcfrctApplication::on_open(): " << ex.what() << std::endl;
   }
+}
+
+
+void GcfrctApplication::on_hide_window(Gtk::Window* window)
+{
+  delete window;
+}
+
+void GcfrctApplication::on_action_preferences()
+{
+
+}
+
+void GcfrctApplication::on_action_quit()
+{
+  // Gio::Application::quit() will make Gio::Application::run() return,
+  // but it's a crude way of ending the program. The window is not removed
+  // from the application. Neither the window's nor the application's
+  // destructors will be called, because there will be remaining reference
+  // counts in both of them. If we want the destructors to be called, we
+  // must remove the window from the application. One way of doing this
+  // is to hide the window. See comment in create_appwindow().
+  auto windows = get_windows();
+  for (auto window : windows)
+    window->hide();
+
+  // Not really necessary, when Gtk::Widget::hide() is called, unless
+  // Gio::Application::hold() has been called without a corresponding call
+  // to Gio::Application::release().
+  quit();
 }

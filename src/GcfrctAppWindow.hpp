@@ -34,7 +34,10 @@ public:
   void open_file_view(const Glib::RefPtr<Gio::File>& file);
 
 protected:
+  Glib::RefPtr<Gio::Settings> m_settings;
   Glib::RefPtr<Gtk::Builder> m_refBuilder;
+  Gtk::Stack* m_stack {nullptr};
+  Gtk::MenuButton* m_gears;
 };
 
 #endif /* GCFRCT_APP_WINDOW_HPP */

@@ -35,15 +35,29 @@ link_directories(${GTKMM_LIBRARY_DIRS})
 find_program(GLIB_COMPILE_RESOURCES NAMES glib-compile-resources REQUIRED)
 set(GRESOURCE_XML ${CMAKE_CURRENT_SOURCE_DIR}/resources.xml)
 set(GRESOURCE_C ${CMAKE_CURRENT_BINARY_DIR}/resources.cpp)
+file(GLOB UI_SOURCES CONFIGURE_DEPENDS ui/*.ui)
 add_custom_command(
     OUTPUT ${GRESOURCE_C}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND ${GLIB_COMPILE_RESOURCES}
     ARGS --target=${GRESOURCE_C} --generate-source ${GRESOURCE_XML}
-    DEPENDS ${GRESOURCE_XML}
+    DEPENDS ${GRESOURCE_XML} ${UI_SOURCES}
     VERBATIM
     MAIN_DEPENDENCY ${GRESOURCE_XML}
 )
+
+find_program(GLIB_COMPILE_SCHEMAS NAMES glib-compile-schemas REQUIRED)
+set(GSCHEMA_XML ${CMAKE_CURRENT_SOURCE_DIR}/gcfrct.gschema.xml)
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gschema.compiled
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${GLIB_COMPILE_SCHEMAS}
+    ARGS --strict --targetdir=${CMAKE_CURRENT_BINARY_DIR} --schema-file=${GSCHEMA_XML}
+    DEPENDS ${GSCHEMA_XML}
+    VERBATIM
+    MAIN_DEPENDENCY ${GSCHEMA_XML}
+)
+add_custom_target(gcfrct_gschema ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gschema.compiled)
 
 add_subdirectory(src)
 
