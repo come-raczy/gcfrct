@@ -26,16 +26,19 @@ GcfrctAppWindow::GcfrctAppWindow(BaseObjectType* cobject,
   const Glib::RefPtr<Gtk::Builder>& refBuilder)
 : Gtk::ApplicationWindow(cobject),
   m_refBuilder(refBuilder),
-  m_settings(),
   m_stack(nullptr),
   m_gears(nullptr)
 {
   m_stack = m_refBuilder->get_widget<Gtk::Stack>("stack");
-  if (!m_stack)
+  if (nullptr == m_stack)
+  {
     throw std::runtime_error("No \"stack\" object in window.ui");
+  }
   m_gears = m_refBuilder->get_widget<Gtk::MenuButton>("gears");
-  if (!m_gears)
+  if (nullptr == m_gears)
+  {
     throw std::runtime_error("No \"gears\" object in window.ui");
+  }
 
   // Bind settings.
   m_settings = Gio::Settings::create("gcfrct");
@@ -45,8 +48,10 @@ GcfrctAppWindow::GcfrctAppWindow(BaseObjectType* cobject,
   // (The connection between action and menu item is specified in gears_menu.ui.)
   auto menu_builder = Gtk::Builder::create_from_resource("/gcfrct/application/ui/gears_menu.ui");
   auto menu = menu_builder->get_object<Gio::MenuModel>("menu");
-  if (!menu)
+  if (nullptr == menu)
+  {
     throw std::runtime_error("No \"menu\" object in gears_menu.ui");
+  }
 
   m_gears->set_menu_model(menu);
 }
@@ -57,9 +62,11 @@ GcfrctAppWindow* GcfrctAppWindow::create()
   // Load the Builder file and instantiate its widgets.
   auto refBuilder = Gtk::Builder::create_from_resource("/gcfrct/application/ui/gcfrct.ui");
 
-  auto window = Gtk::Builder::get_widget_derived<GcfrctAppWindow>(refBuilder, "gcfrct_app_window");
-  if (!window)
+  auto * window = Gtk::Builder::get_widget_derived<GcfrctAppWindow>(refBuilder, "gcfrct_app_window");
+  if (nullptr == window)
+  {
     throw std::runtime_error("No \"gcfrct_app_window\" object in gcfrct.ui");
+  }
 
   return window;
 }
@@ -68,9 +75,9 @@ void GcfrctAppWindow::open_file_view(const Glib::RefPtr<Gio::File>& file)
 {
   const Glib::ustring basename = file->get_basename();
 
-  auto scrolled = Gtk::make_managed<Gtk::ScrolledWindow>();
+  auto * scrolled = Gtk::make_managed<Gtk::ScrolledWindow>();
   scrolled->set_expand(true);
-  auto view = Gtk::make_managed<Gtk::TextView>();
+  auto * view = Gtk::make_managed<Gtk::TextView>();
   view->set_editable(false);
   view->set_cursor_visible(false);
   scrolled->set_child(*view);

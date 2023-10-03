@@ -35,7 +35,7 @@ Glib::RefPtr<GcfrctApplication> GcfrctApplication::create()
 
 GcfrctAppWindow* GcfrctApplication::create_appwindow()
 {
-  auto appwindow = GcfrctAppWindow::create();
+  auto * appwindow = GcfrctAppWindow::create();
 
   // Make sure that the application runs for as long this window is still open.
   add_window(*appwindow);
@@ -67,7 +67,7 @@ void GcfrctApplication::on_activate()
   try
   {
     // The application has been started, so let's show a window.
-    auto appwindow = create_appwindow();
+    auto * appwindow = create_appwindow();
     appwindow->present();
   }
   // If create_appwindow() throws an exception (perhaps from Gtk::Builder),
@@ -90,16 +90,22 @@ void GcfrctApplication::on_open(const Gio::Application::type_vec_files& files,
   // so let's open a new view for each one.
   GcfrctAppWindow* appwindow = nullptr;
   auto windows = get_windows();
-  if (windows.size() > 0)
+  if (!windows.empty())
+  {
     appwindow = dynamic_cast<GcfrctAppWindow*>(windows[0]);
+  }
 
   try
   {
-    if (!appwindow)
+    if (nullptr == appwindow)
+    {
       appwindow = create_appwindow();
+    }
 
     for (const auto& file : files)
+    {
       appwindow->open_file_view(file);
+    }
 
     appwindow->present();
   }
@@ -134,8 +140,10 @@ void GcfrctApplication::on_action_quit()
   // must remove the window from the application. One way of doing this
   // is to hide the window. See comment in create_appwindow().
   auto windows = get_windows();
-  for (auto window : windows)
+  for (auto * window : windows)
+  {
     window->hide();
+  }
 
   // Not really necessary, when Gtk::Widget::hide() is called, unless
   // Gio::Application::hold() has been called without a corresponding call

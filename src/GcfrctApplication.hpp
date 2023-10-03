@@ -41,7 +41,7 @@ protected:
 
 private:
   GcfrctAppWindow* create_appwindow();
-  void on_hide_window(Gtk::Window* window);
+  static void on_hide_window(Gtk::Window* window);
   void on_startup();
   void on_action_preferences();
   void on_action_quit();
