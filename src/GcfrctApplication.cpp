@@ -20,6 +20,7 @@
 
 #include "GcfrctApplication.hpp"
 #include "GcfrctAppWindow.hpp"
+#include "GcfrctPreferences.hpp"
 #include <iostream>
 #include <exception>
 
@@ -127,7 +128,22 @@ void GcfrctApplication::on_hide_window(Gtk::Window* window)
 
 void GcfrctApplication::on_action_preferences()
 {
+  try
+  {
+    auto * prefs_dialog = GcfrctPreferences::create(*get_active_window());
+    prefs_dialog->present();
 
+    // Delete the dialog when it is hidden.
+    prefs_dialog->signal_hide().connect([prefs_dialog](){ delete prefs_dialog; });
+  }
+  catch (const Glib::Error& ex)
+  {
+    std::cerr << "ExampleApplication::on_action_preferences(): " << ex.what() << std::endl;
+  }
+  catch (const std::exception& ex)
+  {
+    std::cerr << "ExampleApplication::on_action_preferences(): " << ex.what() << std::endl;
+  }
 }
 
 void GcfrctApplication::on_action_quit()

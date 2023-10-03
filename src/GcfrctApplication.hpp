@@ -36,8 +36,7 @@ public:
 protected:
   // Override default signal handlers:
   void on_activate() override;
-  void on_open(const Gio::Application::type_vec_files& files,
-    const Glib::ustring& hint) override;
+  void on_open(const Gio::Application::type_vec_files& files, const Glib::ustring& hint) override;
 
 private:
   GcfrctAppWindow* create_appwindow();
