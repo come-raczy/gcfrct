@@ -34,10 +34,18 @@ public:
   void open_file_view(const Glib::RefPtr<Gio::File>& file);
 
 protected:
+  // Signal handlers
+  void on_search_text_changed();
+  void on_visible_child_changed();
+
   Glib::RefPtr<Gio::Settings> m_settings;
   Glib::RefPtr<Gtk::Builder> m_refBuilder;
   Gtk::Stack* m_stack {nullptr};
+  Gtk::ToggleButton* m_search;
+  Gtk::SearchBar* m_searchbar;
+  Gtk::SearchEntry* m_searchentry;
   Gtk::MenuButton* m_gears;
+  Glib::RefPtr<Glib::Binding> m_prop_binding;
 };
 
 #endif /* GCFRCT_APP_WINDOW_HPP */
