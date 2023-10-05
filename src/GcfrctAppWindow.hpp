@@ -37,14 +37,20 @@ protected:
   // Signal handlers
   void on_search_text_changed();
   void on_visible_child_changed();
+  void on_find_word(const Gtk::Button* button);
+  void on_reveal_child_changed();
 
-  Glib::RefPtr<Gio::Settings> m_settings;
+  void update_words();
+
   Glib::RefPtr<Gtk::Builder> m_refBuilder;
+  Glib::RefPtr<Gio::Settings> m_settings;
   Gtk::Stack* m_stack {nullptr};
   Gtk::ToggleButton* m_search;
   Gtk::SearchBar* m_searchbar;
   Gtk::SearchEntry* m_searchentry;
   Gtk::MenuButton* m_gears;
+  Gtk::Revealer* m_sidebar {nullptr};
+  Gtk::ListBox* m_words {nullptr};
   Glib::RefPtr<Glib::Binding> m_prop_binding;
 };
 

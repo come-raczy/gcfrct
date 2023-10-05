@@ -21,6 +21,7 @@
 #include "GcfrctAppWindow.hpp"
 #include <stdexcept>
 #include <iostream>
+#include <set>
 
 GcfrctAppWindow::GcfrctAppWindow(BaseObjectType* cobject,
   const Glib::RefPtr<Gtk::Builder>& refBuilder)
@@ -59,9 +60,22 @@ GcfrctAppWindow::GcfrctAppWindow(BaseObjectType* cobject,
     throw std::runtime_error("No \"gears\" object in window.ui");
   }
 
+  m_sidebar = m_refBuilder->get_widget<Gtk::Revealer>("sidebar");
+  if (nullptr == m_sidebar)
+  {
+    throw std::runtime_error("No \"sidebar\" object in window.ui");
+  }
+
+  m_words = m_refBuilder->get_widget<Gtk::ListBox>("words");
+  if (nullptr == m_words)
+  {
+    throw std::runtime_error("No \"words\" object in window.ui");
+  }
+
   // Bind settings.
   m_settings = Gio::Settings::create("gcfrct");
   m_settings->bind("transition", m_stack->property_transition_type());
+  m_settings->bind("show-words", m_sidebar->property_reveal_child());
 
   // Bind properties.
   m_prop_binding = Glib::Binding::bind_property(m_search->property_active(),
@@ -72,6 +86,8 @@ GcfrctAppWindow::GcfrctAppWindow(BaseObjectType* cobject,
     sigc::mem_fun(*this, &GcfrctAppWindow::on_search_text_changed));
   m_stack->property_visible_child().signal_changed().connect(
     sigc::mem_fun(*this, &GcfrctAppWindow::on_visible_child_changed));
+  m_sidebar->property_reveal_child().signal_changed().connect(
+    sigc::mem_fun(*this, &GcfrctAppWindow::on_reveal_child_changed));
 
   // Connect the menu to the MenuButton m_gears.
   // (The connection between action and menu item is specified in gears_menu.ui.)
@@ -83,6 +99,7 @@ GcfrctAppWindow::GcfrctAppWindow(BaseObjectType* cobject,
   }
 
   m_gears->set_menu_model(menu);
+  add_action(m_settings->create_action("show-words"));
 }
 
 //static
@@ -133,6 +150,7 @@ void GcfrctAppWindow::open_file_view(const Glib::RefPtr<Gio::File>& file)
   buffer->apply_tag(tag, buffer->begin(), buffer->end());
 
   m_search->set_sensitive(true);
+  update_words();
 }
 
 void GcfrctAppWindow::on_search_text_changed()
@@ -143,14 +161,14 @@ void GcfrctAppWindow::on_search_text_changed()
     return;
   }
 
-  auto tab = dynamic_cast<Gtk::ScrolledWindow*>(m_stack->get_visible_child());
+  auto * tab = dynamic_cast<Gtk::ScrolledWindow*>(m_stack->get_visible_child());
   if (nullptr == tab)
   {
     std::cout << "GcfrctAppWindow::on_search_text_changed(): No visible child." << std::endl;
     return;
   }
 
-  auto view = dynamic_cast<Gtk::TextView*>(tab->get_child());
+  auto * view = dynamic_cast<Gtk::TextView*>(tab->get_child());
   if (nullptr == view)
   {
     std::cout << "GcfrctAppWindow::on_search_text_changed(): No visible text view." << std::endl;
@@ -172,5 +190,76 @@ void GcfrctAppWindow::on_search_text_changed()
 void GcfrctAppWindow::on_visible_child_changed()
 {
   m_searchbar->set_search_mode(false);
+  update_words();
+}
+
+void GcfrctAppWindow::on_find_word(const Gtk::Button* button)
+{
+  m_searchentry->set_text(button->get_label());
+}
+
+void GcfrctAppWindow::on_reveal_child_changed()
+{
+  update_words();
+}
+
+void GcfrctAppWindow::update_words()
+{
+  auto * tab = dynamic_cast<Gtk::ScrolledWindow*>(m_stack->get_visible_child());
+  if (nullptr ==tab)
+  {
+    return;
+  }
+
+  auto * view = dynamic_cast<Gtk::TextView*>(tab->get_child());
+  if (nullptr == view)
+  {
+    std::cout << "GcfrctAppWindow::update_words(): No visible text view." << std::endl;
+    return;
+  }
+  auto buffer = view->get_buffer();
+
+  // Find all words in the text buffer.
+  std::set<Glib::ustring> words;
+  auto start = buffer->begin();
+  Gtk::TextIter end;
+  while (start)
+  {
+    while (start && !start.starts_word())
+    {
+      ++start;
+    }
+
+    if (!start)
+    {
+      break;
+    }
+
+    end = start;
+    end.forward_word_end();
+    if (start == end)
+    {
+      break;
+    }
+
+    auto word = buffer->get_text(start, end, false);
+    words.insert(word.lowercase());
+    start = end;
+  }
+
+  // Remove old children from the ListBox.
+  while (auto * child = m_words->get_first_child())
+  {
+    m_words->remove(*child);
+  }
+
+  // Add new child buttons, one per unique word.
+  for (const auto& word : words)
+  {
+    auto * row = Gtk::make_managed<Gtk::Button>(word);
+    row->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this,
+      &GcfrctAppWindow::on_find_word), row));
+    m_words->append(*row);
+  }
 }
 
