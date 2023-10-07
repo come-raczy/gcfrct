@@ -13,6 +13,7 @@ following packages are required:
 * g++ >=10.1.0
 * gtkmm >= 4.0
 * gtest >= 1.12
+* libxml2-utils >= 2.9
 
 Note: on WSL, the following is needed:
 

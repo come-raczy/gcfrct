@@ -20,7 +20,7 @@
 
 cmake_minimum_required(VERSION 3.18)
 enable_testing()
-project(gcfrct LANGUAGES CXX)
+project(gcfrct LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17) # force C++17 on each target
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -30,12 +30,9 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 
-include_directories(${GTKMM_INCLUDE_DIRS})
-link_directories(${GTKMM_LIBRARY_DIRS})
-
 find_program(GLIB_COMPILE_RESOURCES NAMES glib-compile-resources REQUIRED)
 set(GRESOURCE_XML ${CMAKE_CURRENT_SOURCE_DIR}/resources.xml)
-set(GRESOURCE_C ${CMAKE_CURRENT_BINARY_DIR}/resources.cpp)
+set(GRESOURCE_C ${CMAKE_CURRENT_BINARY_DIR}/resources.c)
 file(GLOB UI_SOURCES CONFIGURE_DEPENDS ui/*.ui)
 add_custom_command(
     OUTPUT ${GRESOURCE_C}
@@ -46,6 +43,8 @@ add_custom_command(
     VERBATIM
     MAIN_DEPENDENCY ${GRESOURCE_XML}
 )
+add_library(GRESOURCE_OBJECT OBJECT ${GRESOURCE_C})
+target_compile_options(GRESOURCE_OBJECT PRIVATE ${GTK4_CFLAGS})
 
 find_program(GLIB_COMPILE_SCHEMAS NAMES glib-compile-schemas REQUIRED)
 set(GSCHEMA_XML ${CMAKE_CURRENT_SOURCE_DIR}/gcfrct.gschema.xml)
@@ -62,7 +61,8 @@ add_custom_target(gcfrct_gschema ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gschema
 
 add_subdirectory(src)
 
-add_executable(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}.cpp ${GRESOURCE_C}  $<TARGET_OBJECTS:${CMAKE_PROJECT_NAME}_OBJECTS>)
+add_executable(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}.cpp)
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${${CMAKE_PROJECT_NAME}_SRC_INCLUDE_DIRS})
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE PkgConfig::GTK4 ${GTKMM_LIBRARIES})
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE ${GTKMM_CFLAGS}) 
+target_link_libraries(${CMAKE_PROJECT_NAME} $<TARGET_OBJECTS:${CMAKE_PROJECT_NAME}_OBJECTS> $<TARGET_OBJECTS:GRESOURCE_OBJECT> ${GTKMM_LINK_LIBRARIES})
 
