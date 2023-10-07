@@ -7,11 +7,7 @@
     <property name="hide-on-close">True</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header">
-        <child type="title">
-          <object class="GtkStackSwitcher" id="tabs">
-            <property name="stack">stack</property>
-          </object>
-        </child>
+	<property name="decoration-layout">icon:close</property>
         <child>
           <object class="GtkLabel" id="lines_label">
             <property name="visible">False</property>
@@ -21,6 +17,11 @@
         <child>
           <object class="GtkLabel" id="lines">
             <property name="visible">False</property>
+          </object>
+        </child>
+        <child type="title">
+          <object class="GtkStackSwitcher" id="tabs">
+            <property name="stack">stack</property>
           </object>
         </child>
         <child type="end">

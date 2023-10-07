@@ -118,6 +118,10 @@ GcfrctAppWindow::GcfrctAppWindow(BaseObjectType* cobject,
   add_action(Gio::PropertyAction::create("show-lines", m_lines->property_visible()));
   m_binding_lines_visible = Glib::Binding::bind_property(m_lines->property_visible(),
     m_lines_label->property_visible());
+    
+  // Set the window icon.
+  Gtk::IconTheme::get_for_display(get_display())->add_resource_path("/gcfrct/application/icons");
+  set_icon_name("gcfrct");
 }
 
 //static
