@@ -23,8 +23,6 @@
 
 #include <gtkmm.h>
 
-class GcfrctAppWindow;
-
 class GcfrctApplication: public Gtk::Application
 {
 protected:
@@ -36,14 +34,14 @@ public:
 protected:
   // Override default signal handlers:
   void on_activate() override;
-  void on_open(const Gio::Application::type_vec_files& files, const Glib::ustring& hint) override;
 
 private:
-  GcfrctAppWindow* create_appwindow();
-  static void on_hide_window(Gtk::Window* window);
+  //GcfrctAppWindow* create_appwindow();
+  Gtk::ApplicationWindow* createApplicationWindow();
+  static void onHideWindow(Gtk::Window* window);
   void on_startup();
-  void on_action_preferences();
-  void on_action_quit();
+  void onActionPreferences();
+  void onActionQuit();
 };
 
 #endif /* GCFRCT_APPLICATION_HPP */

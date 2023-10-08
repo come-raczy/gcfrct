@@ -19,7 +19,7 @@
 */
 
 #include "GcfrctApplication.hpp"
-#include "GcfrctAppWindow.hpp"
+#include "GcfrctApplicationWindow.hpp"
 #include "GcfrctPreferences.hpp"
 #include <iostream>
 #include <exception>
@@ -34,12 +34,12 @@ Glib::RefPtr<GcfrctApplication> GcfrctApplication::create()
   return Glib::make_refptr_for_instance<GcfrctApplication>(new GcfrctApplication());
 }
 
-GcfrctAppWindow* GcfrctApplication::create_appwindow()
+Gtk::ApplicationWindow* GcfrctApplication::createApplicationWindow()
 {
-  auto * appwindow = GcfrctAppWindow::create();
+  auto * window = GcfrctApplicationWindow::create();
 
   // Make sure that the application runs for as long this window is still open.
-  add_window(*appwindow);
+  add_window(*window);
 
   // A window can be added to an application with Gtk::Application::add_window()
   // or Gtk::Window::set_application(). When all added windows have been hidden
@@ -47,9 +47,9 @@ GcfrctAppWindow* GcfrctApplication::create_appwindow()
   // unless Gio::Application::hold() has been called.
 
   // Delete the window when it is hidden.
-  appwindow->signal_hide().connect([appwindow](){ delete appwindow; });
+  window->signal_hide().connect([window](){ delete window; });
 
-  return appwindow;
+  return window;
 }
 
 void GcfrctApplication::on_startup()
@@ -58,8 +58,8 @@ void GcfrctApplication::on_startup()
   Gtk::Application::on_startup();
 
   // Add actions and keyboard accelerators for the menu.
-  add_action("preferences", sigc::mem_fun(*this, &GcfrctApplication::on_action_preferences));
-  add_action("quit", sigc::mem_fun(*this, &GcfrctApplication::on_action_quit));
+  add_action("preferences", sigc::mem_fun(*this, &GcfrctApplication::onActionPreferences));
+  add_action("quit", sigc::mem_fun(*this, &GcfrctApplication::onActionQuit));
   set_accel_for_action("app.quit", "<Ctrl>Q");
 }
 
@@ -68,10 +68,10 @@ void GcfrctApplication::on_activate()
   try
   {
     // The application has been started, so let's show a window.
-    auto * appwindow = create_appwindow();
-    appwindow->present();
+    auto * window = createApplicationWindow();
+    window->present();
   }
-  // If create_appwindow() throws an exception (perhaps from Gtk::Builder),
+  // If create_window() throws an exception (perhaps from Gtk::Builder),
   // no window has been created, no window has been added to the application,
   // and therefore the application will stop running.
   catch (const Glib::Error& ex)
@@ -84,49 +84,12 @@ void GcfrctApplication::on_activate()
   }
 }
 
-void GcfrctApplication::on_open(const Gio::Application::type_vec_files& files,
-  const Glib::ustring& /* hint */)
-{
-  // The application has been asked to open some files,
-  // so let's open a new view for each one.
-  GcfrctAppWindow* appwindow = nullptr;
-  auto windows = get_windows();
-  if (!windows.empty())
-  {
-    appwindow = dynamic_cast<GcfrctAppWindow*>(windows[0]);
-  }
-
-  try
-  {
-    if (nullptr == appwindow)
-    {
-      appwindow = create_appwindow();
-    }
-
-    for (const auto& file : files)
-    {
-      appwindow->open_file_view(file);
-    }
-
-    appwindow->present();
-  }
-  catch (const Glib::Error& ex)
-  {
-    std::cerr << "GcfrctApplication::on_open(): " << ex.what() << std::endl;
-  }
-  catch (const std::exception& ex)
-  {
-    std::cerr << "GcfrctApplication::on_open(): " << ex.what() << std::endl;
-  }
-}
-
-
-void GcfrctApplication::on_hide_window(Gtk::Window* window)
+void GcfrctApplication::onHideWindow(Gtk::Window* window)
 {
   delete window;
 }
 
-void GcfrctApplication::on_action_preferences()
+void GcfrctApplication::onActionPreferences()
 {
   try
   {
@@ -138,15 +101,15 @@ void GcfrctApplication::on_action_preferences()
   }
   catch (const Glib::Error& ex)
   {
-    std::cerr << "ExampleApplication::on_action_preferences(): " << ex.what() << std::endl;
+    std::cerr << "ExampleApplication::onActionPreferences(): " << ex.what() << std::endl;
   }
   catch (const std::exception& ex)
   {
-    std::cerr << "ExampleApplication::on_action_preferences(): " << ex.what() << std::endl;
+    std::cerr << "ExampleApplication::onActionPreferences(): " << ex.what() << std::endl;
   }
 }
 
-void GcfrctApplication::on_action_quit()
+void GcfrctApplication::onActionQuit()
 {
   // Gio::Application::quit() will make Gio::Application::run() return,
   // but it's a crude way of ending the program. The window is not removed
@@ -154,7 +117,7 @@ void GcfrctApplication::on_action_quit()
   // destructors will be called, because there will be remaining reference
   // counts in both of them. If we want the destructors to be called, we
   // must remove the window from the application. One way of doing this
-  // is to hide the window. See comment in create_appwindow().
+  // is to hide the window. See comment in create_window().
   auto windows = get_windows();
   for (auto * window : windows)
   {
