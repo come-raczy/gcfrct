@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <object class="GtkApplicationWindow" id="gcfrct_app_window">
-    <property name="title" translatable="yes">Example Application</property>
+  <object class="GtkApplicationWindow" id="GcfrctApplicationWindow">
+    <property name="title" translatable="yes">gcfrct</property>
     <property name="default-width">1200</property>
     <property name="default-height">800</property>
     <property name="hide-on-close">True</property>
@@ -19,7 +19,7 @@
             <property name="visible">False</property>
           </object>
         </child>
-        <child type="title">
+        <child>
           <object class="GtkStackSwitcher" id="tabs">
             <property name="stack">stack</property>
           </object>

@@ -1,5 +1,5 @@
 #include "GcfrctPreferences.hpp"
-#include "GcfrctAppWindow.hpp"
+#include "GcfrctApplicationWindow.hpp"
 #include <array>
 #include <stdexcept>
 

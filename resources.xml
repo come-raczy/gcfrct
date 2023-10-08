@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/gcfrct/application">
-    <file preprocess="xml-stripblanks">ui/gcfrct.ui</file>
+    <file preprocess="xml-stripblanks">ui/GcfrctApplicationWindow.ui</file>
     <file preprocess="xml-stripblanks">ui/gears_menu.ui</file>
     <file preprocess="xml-stripblanks">ui/preferences.ui</file>
     <file>icons/gcfrct.png</file>
