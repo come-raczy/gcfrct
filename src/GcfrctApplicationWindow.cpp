@@ -119,13 +119,21 @@ GcfrctApplicationWindow* GcfrctApplicationWindow::create()
 void GcfrctApplicationWindow::addImageTab()
 {
   const Glib::ustring tabName = "Image";
-  auto * scrolled = Gtk::make_managed<Gtk::ScrolledWindow>();
-  scrolled->set_expand(true);
+  auto * sideBar = Gtk::make_managed<Gtk::ScrolledWindow>();
+  auto * contentArea = Gtk::make_managed<Gtk::ScrolledWindow>();
+  auto * imageBox = Gtk::make_managed<Gtk::Box>();
+  const auto SPACING = 10;
+  const auto MARGIN = 10;
+  imageBox->set_spacing(SPACING);
+  imageBox->set_margin(MARGIN);
+  imageBox->append(*sideBar);
+  imageBox->append(*contentArea);
+  imageBox->set_expand(true);
   auto * view = Gtk::make_managed<Gtk::TextView>();   
   view->set_editable(false);
   view->set_cursor_visible(false);                            
-  scrolled->set_child(*view);
-  stack_->add(*scrolled, tabName, tabName);
+  sideBar->set_child(*view);
+  stack_->add(*imageBox, tabName, tabName);
 }
 
 void GcfrctApplicationWindow::addPrimaryTab()
