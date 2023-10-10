@@ -32,23 +32,12 @@ GcfrctApplicationWindow::GcfrctApplicationWindow(BaseObjectType* cobject,
   {
     throw std::runtime_error("No \"stack\" object in window.ui");
   }
+  stack_->set_halign(Gtk::Align::FILL);
 
   m_search = builder->get_widget<Gtk::ToggleButton>("search");
   if (nullptr == m_search)
   {
     throw std::runtime_error("No \"search\" object in window.ui");
-  }
-
-  m_searchbar = builder->get_widget<Gtk::SearchBar>("searchbar");
-  if (nullptr == m_searchbar)
-  {
-    throw std::runtime_error("No \"searchbar\" object in window.ui");
-  }
-
-  m_searchentry = builder->get_widget<Gtk::SearchEntry>("searchentry");
-  if (nullptr == m_searchentry)
-  {
-    throw std::runtime_error("No \"searchentry\" object in window.ui");
   }
 
   m_gears = builder->get_widget<Gtk::MenuButton>("gears");
@@ -57,26 +46,13 @@ GcfrctApplicationWindow::GcfrctApplicationWindow(BaseObjectType* cobject,
     throw std::runtime_error("No \"gears\" object in window.ui");
   }
 
-  m_sidebar = builder->get_widget<Gtk::Revealer>("sidebar");
-  if (nullptr == m_sidebar)
-  {
-    throw std::runtime_error("No \"sidebar\" object in window.ui");
-  }
-
   // Bind settings.
   m_settings = Gio::Settings::create("gcfrct");
   m_settings->bind("transition", stack_->property_transition_type());
-  m_settings->bind("show-words", m_sidebar->property_reveal_child());
-
-  // Bind properties.
-  m_binding_search_enabled = Glib::Binding::bind_property(m_search->property_active(),
-    m_searchbar->property_search_mode_enabled(), Glib::Binding::Flags::BIDIRECTIONAL);
 
   // Connect signal handlers.
   stack_->property_visible_child().signal_changed().connect(
     sigc::mem_fun(*this, &GcfrctApplicationWindow::onVisibleChildChanged));
-  m_sidebar->property_reveal_child().signal_changed().connect(
-    sigc::mem_fun(*this, &GcfrctApplicationWindow::onRevealChildChanged));
 
   // Connect the menu to the MenuButton m_gears.
   // (The connection between action and menu item is specified in gears_menu.ui.)
@@ -120,19 +96,39 @@ void GcfrctApplicationWindow::addImageTab()
 {
   const Glib::ustring tabName = "Image";
   auto * sideBar = Gtk::make_managed<Gtk::ScrolledWindow>();
+  auto * sideBarBox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 10);
+  for (unsigned i = 0; i < 3; ++i)
+  {
+    const Glib::ustring::value_type mask = 'A' + i;
+    Glib::ustring text = Glib::ustring::sprintf("Mask %c", mask);
+    //auto * frame = Gtk::make_managed<Gtk::Frame>(text);
+    auto * frame = Gtk::make_managed<Gtk::Frame>();
+    frame->set_label(text);
+    frame->set_margin(10);
+    frame->set_label_align(Gtk::Align::END);
+    auto * label = Gtk::make_managed<Gtk::Label>(text);
+    frame->set_child(*label);
+    std::cerr << "Adding label " << text << ": " << label->property_width_chars() <<  std::endl;
+    sideBarBox->append(*frame);
+  }
+  sideBar->set_child(*sideBarBox);
+  auto * sideBarFrame = Gtk::make_managed<Gtk::Frame>("Side Bar --------------------------");
+  sideBarFrame->set_child(*sideBar);
   auto * contentArea = Gtk::make_managed<Gtk::ScrolledWindow>();
-  auto * imageBox = Gtk::make_managed<Gtk::Box>();
+  auto * contentAreaFrame = Gtk::make_managed<Gtk::Frame>("Content Area");
+  contentAreaFrame->set_halign(Gtk::Align::FILL);
+  contentArea->set_halign(Gtk::Align::FILL);
+  contentAreaFrame->set_child(*contentArea);
+  auto * imageBox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 20);
   const auto SPACING = 10;
   const auto MARGIN = 10;
   imageBox->set_spacing(SPACING);
   imageBox->set_margin(MARGIN);
-  imageBox->append(*sideBar);
-  imageBox->append(*contentArea);
+  sideBarFrame->set_halign(Gtk::Align::FILL);
+  imageBox->set_halign(Gtk::Align::FILL);
+  imageBox->append(*sideBarFrame);
+  imageBox->append(*contentAreaFrame);
   imageBox->set_expand(true);
-  auto * view = Gtk::make_managed<Gtk::TextView>();   
-  view->set_editable(false);
-  view->set_cursor_visible(false);                            
-  sideBar->set_child(*view);
   stack_->add(*imageBox, tabName, tabName);
 }
 
@@ -159,7 +155,15 @@ void GcfrctApplicationWindow::addAdjustmentTab(const Glib::ustring &tabName)
   view->set_editable(false);
   view->set_cursor_visible(false);                            
   scrolled->set_child(*view);
-  stack_->add(*scrolled, tabName, tabName);
+  scrolled->set_halign(Gtk::Align::FILL);
+  scrolled->set_valign(Gtk::Align::FILL);
+  scrolled->set_margin(10);
+  auto * frame = Gtk::make_managed<Gtk::Frame>(tabName);
+  frame->set_child(*scrolled);
+  frame->set_halign(Gtk::Align::FILL);
+  frame->set_valign(Gtk::Align::FILL);
+  frame->set_margin(10);
+  stack_->add(*frame, tabName, tabName);
 }
 
 void GcfrctApplicationWindow::onVisibleChildChanged()
