@@ -47,10 +47,7 @@ private:
 
   Glib::RefPtr<Gio::Settings> m_settings;
   Gtk::ToggleButton* m_search;
-  Gtk::SearchBar* m_searchbar;
-  Gtk::SearchEntry* m_searchentry;
   Gtk::MenuButton* m_gears;
-  Gtk::Revealer* m_sidebar {nullptr};
   Glib::RefPtr<Glib::Binding> m_binding_search_enabled;
   Glib::RefPtr<Glib::Binding> m_binding_lines_visible;
 };
